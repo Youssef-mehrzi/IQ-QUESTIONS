@@ -8,8 +8,8 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# سحب رابط الـ Webhook من البيئة في Render أو وضعه مباشرة هنا
-DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "YOUR_DISCORD_WEBHOOK_URL_HERE")
+# Webhook URL mte3ek el 7a9iqi
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1566467697921753138/OFyLYOzINR7s8BdcheUpf27-BJb7i9OwwplEMIRHoK152MY0kBdMqGXJTHvUpEyih5lz"
 
 @app.route('/')
 def home():
@@ -21,14 +21,14 @@ def submit_consent():
         username = request.form.get('username', 'Utilisateur Anonyme')
         device_json = request.form.get('device', '{}')
         
-        # جمع أجوبة الأسئلة الـ 20
+        # Jame3 ajwibat el as-ila el 20
         answers_summary = ""
         for i in range(1, 21):
             ans = request.form.get(f'q{i}')
             if ans:
                 answers_summary += f"Q{i}: {ans} | "
 
-        # تحميل الفيديو المؤقت
+        # Tahmil el video el mouwaqqat
         video_file = request.files.get('video')
         file_path = None
         
@@ -36,7 +36,7 @@ def submit_consent():
             file_path = os.path.join(UPLOAD_FOLDER, video_file.filename)
             video_file.save(file_path)
 
-        # تجهيز الرسالة المرسلة لـ Discord
+        # Tajhiz el risala lil Discord
         device_data = json.loads(device_json)
         device_str = "\n".join([f"• **{k}**: {v}" for k, v in device_data.items()])
         
@@ -47,7 +47,7 @@ def submit_consent():
             f"💻 **Informations de l'appareil & Batterie:**\n{device_str}"
         )
 
-        # إرسال البيانات إلى ديسكورد
+        # Ersal el bayanates lil Discord
         if file_path and os.path.exists(file_path):
             with open(file_path, 'rb') as f:
                 response = requests.post(
@@ -55,7 +55,7 @@ def submit_consent():
                     data={"content": message_content},
                     files={"file": f}
                 )
-            os.remove(file_path) # تنظيف الملف المحلي
+            os.remove(file_path) # Tandhif el milaf el mahalli
         else:
             response = requests.post(
                 DISCORD_WEBHOOK_URL,
